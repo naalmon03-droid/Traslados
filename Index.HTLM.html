@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard Traslados Físicos 2026</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef0f4;color:#252525;min-height:100vh}
+
+/* HEADER */
+.hdr{background:#1c2340;padding:11px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #2f7be5}
+.hdr-logo{width:32px;height:32px;background:#2f7be5;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;flex-shrink:0}
+.hdr-title{font-size:14px;font-weight:700;color:#fff;line-height:1.2}
+.hdr-sub{font-size:10.5px;color:#7a90bb;margin-top:1px}
+.hdr-pills{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.hpill{background:#1a2f5c;border:1px solid #2f6abf;color:#7ab3f0;font-size:10.5px;padding:3px 9px;border-radius:20px;display:flex;align-items:center;gap:4px}
+.hpill i{font-size:11px}
+.dot{width:6px;height:6px;border-radius:50%;background:#3ec68a;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* TOOLBAR */
+.tbar{background:#fff;border-bottom:1px solid #dde1ea;padding:6px 20px;display:flex;align-items:center;gap:7px;font-size:11px;color:#666;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:4px;background:#e8f2fd;color:#1a5fbb;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:600;border:1px solid #bad5f5}
+.chip i{font-size:11px}
+.chip-warn{background:#fff3e0;color:#b05800;border-color:#ffc47a}
+
+/* MAIN */
+.main{padding:13px 18px}
+
+/* KPI ROW */
+.krow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}
+.kcard{background:#fff;border-radius:8px;padding:12px 14px;border:1px solid #dde1ea;position:relative;overflow:hidden;transition:box-shadow .15s}
+.kcard:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.kcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:8px 8px 0 0}
+.kcard.kb::before{background:#2f7be5}.kcard.kg::before{background:#27a05a}
+.kcard.kr::before{background:#e03e3e}.kcard.kam::before{background:#c07810}
+.kcard.kt::before{background:#1a9080}
+.klbl{font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.kval{font-size:24px;font-weight:800;color:#1c2340;line-height:1}
+.ksub{font-size:10px;color:#999;margin-top:4px;display:flex;align-items:center;gap:3px}
+.up{color:#27a05a;font-weight:700}.dn{color:#e03e3e;font-weight:700}
+.kico{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:24px;opacity:.07;color:#1c2340}
+
+/* ALERT STRIP */
+.alert{background:#fff4f4;border:1px solid #f5b8b8;border-radius:7px;padding:8px 13px;margin-bottom:12px;font-size:11px;color:#a02020;display:flex;align-items:flex-start;gap:8px}
+.alert i{font-size:16px;flex-shrink:0;margin-top:1px}
+
+/* GRID ROWS */
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:11px}
+.r2l{display:grid;grid-template-columns:1.6fr 1fr;gap:11px;margin-bottom:11px}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px}
+.r2r{display:grid;grid-template-columns:1fr 1.6fr;gap:11px;margin-bottom:11px}
+
+/* PANELS */
+.panel{background:#fff;border-radius:8px;border:1px solid #dde1ea;padding:12px 14px}
+.ptitle{font-size:10.5px;font-weight:700;color:#3a3a3a;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.pbadge{font-size:9.5px;padding:2px 7px;border-radius:10px;font-weight:700;text-transform:none;letter-spacing:0;white-space:nowrap;flex-shrink:0}
+.pb-blue{background:#e8f2fd;color:#1a5fbb}
+.pb-green{background:#e6f5ee;color:#1a7040}
+.pb-amber{background:#fff3e0;color:#a05200}
+.pb-red{background:#fef0f0;color:#992020}
+.pb-gray{background:#f2f3f5;color:#555}
+
+/* BARRA HORIZONTAL */
+.blist{display:flex;flex-direction:column;gap:5px}
+.bi{display:flex;align-items:center;gap:6px;font-size:10.5px}
+.bn{flex-shrink:0;color:#3a3a3a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bn-r{width:100px}.bn-d{width:92px}
+.btrack{flex:1;height:7px;background:#eef0f4;border-radius:4px;overflow:hidden}
+.bfill{height:100%;border-radius:4px}
+.bval{width:34px;text-align:right;font-weight:700;font-size:10.5px}
+.bcnt{width:26px;text-align:right;color:#aaa;font-size:9.5px}
+.cg{background:#27a05a}.ct{color:#1a7040}
+.cam{background:#c07810}.cat{color:#8a5000}
+.cr{background:#e03e3e}.crt{color:#992020}
+.cb{background:#2f7be5}.cbt{color:#1a5fbb}
+
+/* DONUT */
+.dw{display:flex;align-items:center;gap:12px}
+.dleg{display:flex;flex-direction:column;gap:5px;flex:1}
+.ditem{display:flex;align-items:center;gap:6px;font-size:10.5px}
+.ddot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.dlbl{color:#555}
+.dval{font-weight:700;color:#1c2340;margin-left:auto}
+.dsub{font-size:9px;color:#aaa;margin-left:15px;margin-top:-3px}
+
+/* TABLAS */
+.tw{overflow-y:auto;max-height:270px}
+.tw::-webkit-scrollbar{width:3px}
+.tw::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px}
+table.dt{width:100%;border-collapse:collapse;font-size:10.5px}
+table.dt th{text-align:left;font-weight:700;color:#888;font-size:9px;text-transform:uppercase;letter-spacing:.4px;padding:4px 6px;border-bottom:1px solid #e5e7ec;white-space:nowrap;position:sticky;top:0;background:#fff;z-index:1}
+table.dt th:not(:first-child){text-align:right}
+table.dt td{padding:4px 6px;border-bottom:1px solid #f2f3f5;color:#3a3a3a}
+table.dt td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}
+table.dt .tfoot td{font-weight:800;color:#1c2340;border-top:1.5px solid #dde1ea;border-bottom:none;background:#f8f9fb}
+table.dt tr:hover:not(.tfoot) td{background:#f5f8fd}
+.pill{display:inline-block;padding:1px 6px;border-radius:10px;font-size:9px;font-weight:700}
+.pill-g{background:#e6f5ee;color:#1a7040}
+.pill-a{background:#fff3e0;color:#a05200}
+.pill-r{background:#fef0f0;color:#992020}
+.pill-b{background:#e8f2fd;color:#1a5fbb}
+td.warn-row{color:#992020!important;font-weight:700!important}
+
+/* SEPARADOR */
+.sep{height:1px;background:#f2f3f5;margin:9px 0}
+
+/* FOOTER */
+.footer{background:#fff;border-top:1px solid #dde1ea;padding:6px 20px;font-size:10px;color:#aaa;display:flex;align-items:center;justify-content:space-between}
+.pbi{display:flex;align-items:center;gap:5px;font-size:9.5px;color:#bbb;font-weight:600}
+.pbi-i{width:14px;height:14px;background:#f2c811;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7.5px;color:#333;font-weight:800}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="hdr">
+  <div style="display:flex;align-items:center;gap:11px">
+    <div class="hdr-logo"><i class="ti ti-truck-delivery" aria-hidden="true"></i></div>
+    <div>
+      <div class="hdr-title">Control de Traslados Físicos</div>
+      <div class="hdr-sub">Seguimiento · Cumplimiento · Diligenciamiento — Tipo Físico</div>
+    </div>
+  </div>
+  <div class="hdr-pills">
+    <div class="hpill"><span class="dot"></span>Corte: 09 May 2026</div>
+    <div class="hpill"><i class="ti ti-calendar"></i>02 Ene – 09 May 2026</div>
+    <div class="hpill"><i class="ti ti-database"></i>Base_PB.xlsx</div>
+  </div>
+</div>
+
+<!-- ── TOOLBAR ── -->
+<div class="tbar">
+  <i class="ti ti-adjustments-horizontal" style="font-size:13px"></i>
+  <span style="color:#aaa">Filtros activos:</span>
+  <div class="chip"><i class="ti ti-truck"></i>Tipo: Físico</div>
+  <div class="chip"><i class="ti ti-building"></i>Todas las regionales</div>
+  <div class="chip"><i class="ti ti-calendar"></i>Ene – May 2026</div>
+  <div class="chip chip-warn"><i class="ti ti-alert-triangle"></i>Alerta: Bucaramanga 0% despacho / 4.4% recibo</div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- KPIs -->
+  <div class="krow">
+    <div class="kcard kb">
+      <div class="klbl">Total traslados</div>
+      <div class="kval">1.224</div>
+      <div class="ksub">Registros físico</div>
+      <i class="ti ti-package kico" aria-hidden="true"></i>
+    </div>
+    <div class="kcard kg">
+      <div class="klbl">On Time</div>
+      <div class="kval" style="color:#1a7040">951</div>
+      <div class="ksub"><span class="up">↑</span>77.7% del total</div>
+      <i class="ti ti-circle-check kico" aria-hidden="true"></i>
+    </div>
+    <div class="kcard kr">
+      <div class="klbl">Off Time</div>
+      <div class="kval" style="color:#992020">263</div>
+      <div class="ksub"><span class="dn">↑</span>21.5% del total</div>
+      <i class="ti ti-clock-x kico" aria-hidden="true"></i>
+    </div>
+    <div class="kcard kam">
+      <div class="klbl">En Tránsito</div>
+      <div class="kval" style="color:#7a4400">10</div>
+      <div class="ksub">Pendientes resultado</div>
+      <i class="ti ti-rotate-clockwise kico" aria-hidden="true"></i>
+    </div>
+    <div class="kcard kt">
+      <div class="klbl">% Cumplimiento</div>
+      <div class="kval" style="color:#0e6055">78.3%</div>
+      <div class="ksub">On Time / Evaluados (1.214)</div>
+      <i class="ti ti-chart-pie kico" aria-hidden="true"></i>
+    </div>
+  </div>
+
+  <!-- ALERTA -->
+  <div class="alert">
+    <i class="ti ti-alert-triangle"></i>
+    <div><strong>Alerta crítica — Bucaramanga:</strong> 0 de 71 traslados registrados en plantilla de despacho (0%) y solo 5 de 113 en recibo (4.4%). Requiere acción inmediata del área de Auditoría y seguimiento urgente del distrito Nor Oriente.</div>
+  </div>
+
+  <!-- FILA 1: Donut estado + Regional Origen + Regional Destino -->
+  <div class="r3">
+
+    <!-- Donut estado -->
+    <div class="panel">
+      <div class="ptitle">Estado general <span class="pbadge pb-gray">1.214 evaluados</span></div>
+      <div class="dw">
+        <div style="position:relative;width:110px;height:110px;flex-shrink:0">
+          <canvas id="dEstado" role="img" aria-label="On Time 78.3% Off Time 21.7%">On Time 78.3% — Off Time 21.7%</canvas>
+        </div>
+        <div class="dleg">
+          <div class="ditem"><div class="ddot" style="background:#27a05a"></div><span class="dlbl">On Time</span><span class="dval" style="color:#1a7040">78.3%</span></div>
+          <div class="dsub">951 traslados</div>
+          <div class="ditem"><div class="ddot" style="background:#e03e3e"></div><span class="dlbl">Off Time</span><span class="dval" style="color:#992020">21.7%</span></div>
+          <div class="dsub">263 traslados</div>
+          <div class="sep"></div>
+          <div class="ditem"><div class="ddot" style="background:#c07810"></div><span class="dlbl">En tránsito</span><span class="dval" style="color:#7a4400">10</span></div>
+          <div style="margin-top:5px;padding:5px 7px;background:#f8f9fb;border-radius:5px;font-size:9.5px;color:#666">
+            <span style="font-weight:700;color:#1c2340">Plantilla despacho:</span> 85.3% registrados<br>
+            <span style="font-weight:700;color:#1c2340">Plantilla recibo:</span> 78.2% registrados
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barras Regional Origen -->
+    <div class="panel">
+      <div class="ptitle">Regional — Origen <span class="pbadge pb-green">% On Time</span></div>
+      <div class="blist">
+        <div class="bi"><span class="bn bn-r">Nor Occidente</span><div class="btrack"><div class="bfill cg" style="width:91.9%"></div></div><span class="bval ct">91.9%</span><span class="bcnt">160</span></div>
+        <div class="bi"><span class="bn bn-r">Eje Cafetero</span><div class="btrack"><div class="bfill cg" style="width:90.8%"></div></div><span class="bval ct">90.8%</span><span class="bcnt">141</span></div>
+        <div class="bi"><span class="bn bn-r">Costa</span><div class="btrack"><div class="bfill cg" style="width:79.1%"></div></div><span class="bval cat">79.1%</span><span class="bcnt">263</span></div>
+        <div class="bi"><span class="bn bn-r">Centro</span><div class="btrack"><div class="bfill cam" style="width:75.5%"></div></div><span class="bval cat">75.5%</span><span class="bcnt">462</span></div>
+        <div class="bi"><span class="bn bn-r">Nor Oriente</span><div class="btrack"><div class="bfill cr" style="width:64.4%"></div></div><span class="bval crt">64.4%</span><span class="bcnt">90</span></div>
+        <div class="bi"><span class="bn bn-r">Sur Occidente</span><div class="btrack"><div class="bfill cr" style="width:62.2%"></div></div><span class="bval crt">62.2%</span><span class="bcnt">98</span></div>
+      </div>
+    </div>
+
+    <!-- Barras Regional Destino -->
+    <div class="panel">
+      <div class="ptitle">Regional — Destino <span class="pbadge pb-green">% On Time</span></div>
+      <div class="blist">
+        <div class="bi"><span class="bn bn-r">Eje Cafetero</span><div class="btrack"><div class="bfill cg" style="width:84.6%"></div></div><span class="bval ct">84.6%</span><span class="bcnt">253</span></div>
+        <div class="bi"><span class="bn bn-r">Costa</span><div class="btrack"><div class="bfill cg" style="width:82.3%"></div></div><span class="bval ct">82.3%</span><span class="bcnt">282</span></div>
+        <div class="bi"><span class="bn bn-r">Nor Occidente</span><div class="btrack"><div class="bfill cam" style="width:76.6%"></div></div><span class="bval cat">76.6%</span><span class="bcnt">145</span></div>
+        <div class="bi"><span class="bn bn-r">Centro</span><div class="btrack"><div class="bfill cam" style="width:75.9%"></div></div><span class="bval cat">75.9%</span><span class="bcnt">249</span></div>
+        <div class="bi"><span class="bn bn-r">Nor Oriente</span><div class="btrack"><div class="bfill cr" style="width:72.5%"></div></div><span class="bval crt">72.5%</span><span class="bcnt">138</span></div>
+        <div class="bi"><span class="bn bn-r">Sur Occidente</span><div class="btrack"><div class="bfill cr" style="width:71.4%"></div></div><span class="bval crt">71.4%</span><span class="bcnt">147</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILA 2: Barras apiladas distrito origen + Tabla distrito origen -->
+  <div class="r2l">
+
+    <div class="panel">
+      <div class="ptitle">Cumplimiento distrito — Origen <span class="pbadge pb-blue">On Time vs Off Time</span></div>
+      <div style="position:relative;height:220px">
+        <canvas id="cOrigen" role="img" aria-label="Barras apiladas cumplimiento por distrito origen">Tunja 100% · Dosquebradas 92.7% · Medellín 92.5% ... Pasto 47.4%</canvas>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ptitle">Detalle distrito — Origen <span class="pbadge pb-gray">17 distritos</span></div>
+      <div class="tw">
+        <table class="dt">
+          <thead><tr><th>Distrito</th><th>Regional</th><th>Off</th><th>On</th><th>Tot.</th><th>%</th></tr></thead>
+          <tbody>
+            <tr><td>Tunja</td><td style="color:#888;font-size:9px">CENTRO</td><td>0</td><td>15</td><td>15</td><td><span class="pill pill-g">100%</span></td></tr>
+            <tr><td>Dosquebradas</td><td style="color:#888;font-size:9px">EJE CAF.</td><td>6</td><td>76</td><td>82</td><td><span class="pill pill-g">92.7%</span></td></tr>
+            <tr><td>Medellín</td><td style="color:#888;font-size:9px">NOR OCC.</td><td>10</td><td>124</td><td>134</td><td><span class="pill pill-g">92.5%</span></td></tr>
+            <tr><td>Montería</td><td style="color:#888;font-size:9px">NOR OCC.</td><td>3</td><td>23</td><td>26</td><td><span class="pill pill-g">88.5%</span></td></tr>
+            <tr><td>Manizales</td><td style="color:#888;font-size:9px">EJE CAF.</td><td>7</td><td>52</td><td>59</td><td><span class="pill pill-g">88.1%</span></td></tr>
+            <tr><td>Cartagena</td><td style="color:#888;font-size:9px">COSTA</td><td>10</td><td>47</td><td>57</td><td><span class="pill pill-g">82.5%</span></td></tr>
+            <tr><td>Neiva</td><td style="color:#888;font-size:9px">CENTRO</td><td>6</td><td>27</td><td>33</td><td><span class="pill pill-g">81.8%</span></td></tr>
+            <tr><td>Barranquilla</td><td style="color:#888;font-size:9px">COSTA</td><td>22</td><td>86</td><td>108</td><td><span class="pill pill-a">79.6%</span></td></tr>
+            <tr><td>Ibagué</td><td style="color:#888;font-size:9px">CENTRO</td><td>6</td><td>21</td><td>27</td><td><span class="pill pill-a">77.8%</span></td></tr>
+            <tr><td>Santa Marta</td><td style="color:#888;font-size:9px">COSTA</td><td>13</td><td>43</td><td>56</td><td><span class="pill pill-a">76.8%</span></td></tr>
+            <tr><td>V/Dupar</td><td style="color:#888;font-size:9px">COSTA</td><td>10</td><td>32</td><td>42</td><td><span class="pill pill-a">76.2%</span></td></tr>
+            <tr><td>Bogotá</td><td style="color:#888;font-size:9px">CENTRO</td><td>95</td><td>269</td><td>364</td><td><span class="pill pill-a">73.9%</span></td></tr>
+            <tr><td>Villavicencio</td><td style="color:#888;font-size:9px">CENTRO</td><td>6</td><td>17</td><td>23</td><td><span class="pill pill-a">73.9%</span></td></tr>
+            <tr><td>Bucaramanga</td><td style="color:#888;font-size:9px">NOR OR.</td><td>22</td><td>46</td><td>68</td><td><span class="pill pill-r">67.6%</span></td></tr>
+            <tr><td>Cali</td><td style="color:#888;font-size:9px">SUR OCC.</td><td>27</td><td>52</td><td>79</td><td><span class="pill pill-r">65.8%</span></td></tr>
+            <tr><td>Cúcuta</td><td style="color:#888;font-size:9px">NOR OR.</td><td>10</td><td>12</td><td>22</td><td><span class="pill pill-r">54.5%</span></td></tr>
+            <tr><td>Pasto</td><td style="color:#888;font-size:9px">SUR OCC.</td><td>10</td><td>9</td><td>19</td><td><span class="pill pill-r">47.4%</span></td></tr>
+            <tr class="tfoot"><td>Total</td><td></td><td>263</td><td>951</td><td>1.214</td><td><span class="pill pill-a">78.3%</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILA 3: Barras horizontales distrito destino + Tabla distrito destino -->
+  <div class="r2r">
+
+    <div class="panel">
+      <div class="ptitle">Detalle distrito — Destino <span class="pbadge pb-gray">17 distritos</span></div>
+      <div class="tw">
+        <table class="dt">
+          <thead><tr><th>Distrito</th><th>Regional</th><th>Off</th><th>On</th><th>Tot.</th><th>%</th></tr></thead>
+          <tbody>
+            <tr><td>Dosquebradas</td><td style="color:#888;font-size:9px">EJE CAF.</td><td>20</td><td>131</td><td>151</td><td><span class="pill pill-g">86.8%</span></td></tr>
+            <tr><td>V/Dupar</td><td style="color:#888;font-size:9px">COSTA</td><td>4</td><td>22</td><td>26</td><td><span class="pill pill-g">84.6%</span></td></tr>
+            <tr><td>Santa Marta</td><td style="color:#888;font-size:9px">COSTA</td><td>9</td><td>46</td><td>55</td><td><span class="pill pill-g">83.6%</span></td></tr>
+            <tr><td>Barranquilla</td><td style="color:#888;font-size:9px">COSTA</td><td>20</td><td>97</td><td>117</td><td><span class="pill pill-g">82.9%</span></td></tr>
+            <tr><td>Manizales</td><td style="color:#888;font-size:9px">EJE CAF.</td><td>19</td><td>83</td><td>102</td><td><span class="pill pill-g">81.4%</span></td></tr>
+            <tr><td>Villavicencio</td><td style="color:#888;font-size:9px">CENTRO</td><td>3</td><td>13</td><td>16</td><td><span class="pill pill-g">81.2%</span></td></tr>
+            <tr><td>Bogotá</td><td style="color:#888;font-size:9px">CENTRO</td><td>30</td><td>124</td><td>154</td><td><span class="pill pill-g">80.5%</span></td></tr>
+            <tr><td>Cartagena</td><td style="color:#888;font-size:9px">COSTA</td><td>17</td><td>67</td><td>84</td><td><span class="pill pill-a">79.8%</span></td></tr>
+            <tr><td>Montería</td><td style="color:#888;font-size:9px">NOR OCC.</td><td>5</td><td>17</td><td>22</td><td><span class="pill pill-a">77.3%</span></td></tr>
+            <tr><td>Medellín</td><td style="color:#888;font-size:9px">NOR OCC.</td><td>29</td><td>94</td><td>123</td><td><span class="pill pill-a">76.4%</span></td></tr>
+            <tr><td>Cali</td><td style="color:#888;font-size:9px">SUR OCC.</td><td>37</td><td>102</td><td>139</td><td><span class="pill pill-a">73.4%</span></td></tr>
+            <tr><td>Bucaramanga</td><td style="color:#888;font-size:9px">NOR OR.</td><td>30</td><td>81</td><td>111</td><td><span class="pill pill-a">73.0%</span></td></tr>
+            <tr><td>Cúcuta</td><td style="color:#888;font-size:9px">NOR OR.</td><td>8</td><td>19</td><td>27</td><td><span class="pill pill-a">70.4%</span></td></tr>
+            <tr><td>Ibagué</td><td style="color:#888;font-size:9px">CENTRO</td><td>13</td><td>28</td><td>41</td><td><span class="pill pill-r">68.3%</span></td></tr>
+            <tr><td>Neiva</td><td style="color:#888;font-size:9px">CENTRO</td><td>7</td><td>14</td><td>21</td><td><span class="pill pill-r">66.7%</span></td></tr>
+            <tr><td>Tunja</td><td style="color:#888;font-size:9px">CENTRO</td><td>7</td><td>10</td><td>17</td><td><span class="pill pill-r">58.8%</span></td></tr>
+            <tr><td>Pasto</td><td style="color:#888;font-size:9px">SUR OCC.</td><td>5</td><td>3</td><td>8</td><td><span class="pill pill-r">37.5%</span></td></tr>
+            <tr class="tfoot"><td>Total</td><td></td><td>263</td><td>951</td><td>1.214</td><td><span class="pill pill-a">78.3%</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ptitle">Cumplimiento distrito — Destino <span class="pbadge pb-blue">% On Time</span></div>
+      <div style="position:relative;height:340px">
+        <canvas id="cDestino" role="img" aria-label="Barras horizontales cumplimiento destino por distrito">Dosquebradas 86.8% ... Pasto 37.5%</canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILA 4: Tabla plantilla despacho + Tabla plantilla recibo + Donuts -->
+  <div class="r3">
+
+    <!-- Tabla plantilla despacho -->
+    <div class="panel">
+      <div class="ptitle">Plantilla despacho — Origen <span class="pbadge pb-amber">% Diligenciado</span></div>
+      <div class="tw" style="max-height:255px">
+        <table class="dt">
+          <thead><tr><th>Distrito Origen</th><th>No</th><th>Sí</th><th>Total</th><th>%</th></tr></thead>
+          <tbody>
+            <tr><td>Cúcuta</td><td>0</td><td>24</td><td>24</td><td><span class="pill pill-g">100%</span></td></tr>
+            <tr><td>Santa Marta</td><td>0</td><td>56</td><td>56</td><td><span class="pill pill-g">100%</span></td></tr>
+            <tr><td>Neiva</td><td>0</td><td>33</td><td>33</td><td><span class="pill pill-g">100%</span></td></tr>
+            <tr><td>Dosquebradas</td><td>1</td><td>82</td><td>83</td><td><span class="pill pill-g">98.8%</span></td></tr>
+            <tr><td>Cartagena</td><td>2</td><td>55</td><td>57</td><td><span class="pill pill-g">96.5%</span></td></tr>
+            <tr><td>Villavicencio</td><td>1</td><td>22</td><td>23</td><td><span class="pill pill-g">95.7%</span></td></tr>
+            <tr><td>Cali</td><td>4</td><td>75</td><td>79</td><td><span class="pill pill-g">94.9%</span></td></tr>
+            <tr><td>Tunja</td><td>1</td><td>14</td><td>15</td><td><span class="pill pill-g">93.3%</span></td></tr>
+            <tr><td>V/Dupar</td><td>3</td><td>39</td><td>42</td><td><span class="pill pill-g">92.9%</span></td></tr>
+            <tr><td>Bogotá</td><td>26</td><td>340</td><td>366</td><td><span class="pill pill-g">92.9%</span></td></tr>
+            <tr><td>Pasto</td><td>2</td><td>18</td><td>20</td><td><span class="pill pill-g">90.0%</span></td></tr>
+            <tr><td>Medellín</td><td>14</td><td>120</td><td>134</td><td><span class="pill pill-g">89.6%</span></td></tr>
+            <tr><td>Montería</td><td>3</td><td>23</td><td>26</td><td><span class="pill pill-g">88.5%</span></td></tr>
+            <tr><td>Manizales</td><td>9</td><td>50</td><td>59</td><td><span class="pill pill-a">84.7%</span></td></tr>
+            <tr><td>Ibagué</td><td>6</td><td>21</td><td>27</td><td><span class="pill pill-a">77.8%</span></td></tr>
+            <tr><td>Barranquilla</td><td>37</td><td>72</td><td>109</td><td><span class="pill pill-r">66.1%</span></td></tr>
+            <tr><td class="warn-row">⚠ Bucaramanga</td><td class="warn-row">71</td><td class="warn-row">0</td><td>71</td><td><span class="pill pill-r">0.0%</span></td></tr>
+            <tr class="tfoot"><td>Total</td><td>180</td><td>1.044</td><td>1.224</td><td><span class="pill pill-a">85.3%</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tabla plantilla recibo -->
+    <div class="panel">
+      <div class="ptitle">Plantilla recibo — Destino <span class="pbadge pb-amber">% Diligenciado</span></div>
+      <div class="tw" style="max-height:255px">
+        <table class="dt">
+          <thead><tr><th>Distrito Destino</th><th>No</th><th>Sí</th><th>Total</th><th>%</th></tr></thead>
+          <tbody>
+            <tr><td>Santa Marta</td><td>0</td><td>55</td><td>55</td><td><span class="pill pill-g">100%</span></td></tr>
+            <tr><td>Neiva</td><td>0</td><td>21</td><td>21</td><td><span class="pill pill-g">100%</span></td></tr>
+            <tr><td>Tunja</td><td>1</td><td>16</td><td>17</td><td><span class="pill pill-g">94.1%</span></td></tr>
+            <tr><td>Cúcuta</td><td>2</td><td>26</td><td>28</td><td><span class="pill pill-g">92.9%</span></td></tr>
+            <tr><td>Cartagena</td><td>7</td><td>78</td><td>85</td><td><span class="pill pill-g">91.8%</span></td></tr>
+            <tr><td>Dosquebradas</td><td>13</td><td>140</td><td>153</td><td><span class="pill pill-g">91.5%</span></td></tr>
+            <tr><td>Medellín</td><td>13</td><td>112</td><td>125</td><td><span class="pill pill-g">89.6%</span></td></tr>
+            <tr><td>Manizales</td><td>11</td><td>91</td><td>102</td><td><span class="pill pill-g">89.2%</span></td></tr>
+            <tr><td>V/Dupar</td><td>3</td><td>23</td><td>26</td><td><span class="pill pill-g">88.5%</span></td></tr>
+            <tr><td>Villavicencio</td><td>2</td><td>14</td><td>16</td><td><span class="pill pill-g">87.5%</span></td></tr>
+            <tr><td>Cali</td><td>18</td><td>121</td><td>139</td><td><span class="pill pill-g">87.1%</span></td></tr>
+            <tr><td>Montería</td><td>4</td><td>18</td><td>22</td><td><span class="pill pill-a">81.8%</span></td></tr>
+            <tr><td>Ibagué</td><td>8</td><td>33</td><td>41</td><td><span class="pill pill-a">80.5%</span></td></tr>
+            <tr><td>Bogotá</td><td>40</td><td>116</td><td>156</td><td><span class="pill pill-a">74.4%</span></td></tr>
+            <tr><td>Barranquilla</td><td>34</td><td>83</td><td>117</td><td><span class="pill pill-a">70.9%</span></td></tr>
+            <tr><td>Pasto</td><td>3</td><td>5</td><td>8</td><td><span class="pill pill-r">62.5%</span></td></tr>
+            <tr><td class="warn-row">⚠ Bucaramanga</td><td class="warn-row">108</td><td class="warn-row">5</td><td>113</td><td><span class="pill pill-r">4.4%</span></td></tr>
+            <tr class="tfoot"><td>Total</td><td>267</td><td>957</td><td>1.224</td><td><span class="pill pill-a">78.2%</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Donuts plantillas -->
+    <div class="panel">
+      <div class="ptitle">Resumen plantillas <span class="pbadge pb-amber">Despacho y Recibo</span></div>
+
+      <div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px">Plantilla Despacho — Origen</div>
+      <div class="dw" style="margin-bottom:12px">
+        <div style="position:relative;width:90px;height:90px;flex-shrink:0">
+          <canvas id="dDespacho" role="img" aria-label="Despacho registrado 85.3% no registrado 14.7%">Sí 85.3% — No 14.7%</canvas>
+        </div>
+        <div class="dleg" style="gap:4px">
+          <div class="ditem"><div class="ddot" style="background:#1c3a70"></div><span class="dlbl">Registrados (Sí)</span><span class="dval" style="color:#0c3a80;font-size:16px">85.3%</span></div>
+          <div class="dsub" style="margin-left:15px">1.044 traslados</div>
+          <div class="ditem"><div class="ddot" style="background:#7ab3f0"></div><span class="dlbl">No registrados</span><span class="dval" style="color:#2f7be5;font-size:16px">14.7%</span></div>
+          <div class="dsub" style="margin-left:15px">180 traslados</div>
+        </div>
+      </div>
+
+      <div style="height:1px;background:#f2f3f5;margin-bottom:11px"></div>
+
+      <div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px">Plantilla Recibo — Destino</div>
+      <div class="dw">
+        <div style="position:relative;width:90px;height:90px;flex-shrink:0">
+          <canvas id="dRecibo" role="img" aria-label="Recibo registrado 78.2% no registrado 21.8%">Sí 78.2% — No 21.8%</canvas>
+        </div>
+        <div class="dleg" style="gap:4px">
+          <div class="ditem"><div class="ddot" style="background:#1c3a70"></div><span class="dlbl">Registrados (Sí)</span><span class="dval" style="color:#0c3a80;font-size:16px">78.2%</span></div>
+          <div class="dsub" style="margin-left:15px">957 traslados</div>
+          <div class="ditem"><div class="ddot" style="background:#7ab3f0"></div><span class="dlbl">No registrados</span><span class="dval" style="color:#2f7be5;font-size:16px">21.8%</span></div>
+          <div class="dsub" style="margin-left:15px">267 traslados</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- FOOTER -->
+<div class="footer">
+  <span>* Cumplimiento = On Time / (On Time + Off Time). Criterio: recepción ≤ 5 días calendario. | Período: 02 Ene – 09 May 2026 | Fuente: Base_PB.xlsx | Tipo: Físico</span>
+  <div class="pbi"><div class="pbi-i">PB</div>Dashboard Traslados Físicos v3</div>
+</div>
+
+<script>
+function gc(p){return p>=80?'#27a05a':p>=65?'#c07810':'#e03e3e'}
+
+/* ── Donut estado ── */
+new Chart(document.getElementById('dEstado'),{
+  type:'doughnut',
+  data:{labels:['On Time','Off Time'],datasets:[{data:[951,263],backgroundColor:['#27a05a','#e03e3e'],borderWidth:2,borderColor:'#fff',hoverOffset:4}]},
+  options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed} (${(c.parsed/1214*100).toFixed(1)}%)`}}}}
+});
+
+/* ── Donut despacho ── */
+new Chart(document.getElementById('dDespacho'),{
+  type:'doughnut',
+  data:{labels:['Sí','No'],datasets:[{data:[1044,180],backgroundColor:['#1c3a70','#7ab3f0'],borderWidth:2,borderColor:'#fff'}]},
+  options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed}`}}}}
+});
+
+/* ── Donut recibo ── */
+new Chart(document.getElementById('dRecibo'),{
+  type:'doughnut',
+  data:{labels:['Sí','No'],datasets:[{data:[957,267],backgroundColor:['#1c3a70','#7ab3f0'],borderWidth:2,borderColor:'#fff'}]},
+  options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed}`}}}}
+});
+
+/* ── Barras apiladas origen ── */
+const oLbl=['Tunja','Dosquebradas','Medellín','Montería','Manizales','Cartagena','Neiva','Barranquilla','Ibagué','Sta.Marta','V/Dupar','Bogotá','Villavicencio','Bucaramanga','Cali','Cúcuta','Pasto'];
+const oOn =[15,76,124,23,52,47,27,86,21,43,32,269,17,46,52,12,9];
+const oOff=[0,6,10,3,7,10,6,22,6,13,10,95,6,22,27,10,10];
+new Chart(document.getElementById('cOrigen'),{
+  type:'bar',
+  data:{labels:oLbl,datasets:[
+    {label:'On Time',data:oOn,backgroundColor:'#27a05a',borderRadius:3,stack:'s'},
+    {label:'Off Time',data:oOff,backgroundColor:'#f5b8b8',borderRadius:3,stack:'s'}
+  ]},
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{footer:it=>{const on=it[0]?.raw||0,off=it[1]?.raw||0,t=on+off;return `% On Time: ${t?(on/t*100).toFixed(1):0}%`}}}},
+    scales:{
+      x:{stacked:true,grid:{display:false},border:{display:false},ticks:{font:{size:9},color:'#555',maxRotation:40,minRotation:30,autoSkip:false}},
+      y:{stacked:true,grid:{color:'#f2f3f5'},border:{display:false},ticks:{font:{size:9},color:'#aaa'}}
+    }
+  }
+});
+
+/* ── Barras horizontales destino ── */
+const dLbl=['Dosquebradas','V/Dupar','Sta.Marta','Barranquilla','Manizales','Villavicencio','Bogotá','Cartagena','Montería','Medellín','Cali','Bucaramanga','Cúcuta','Ibagué','Neiva','Tunja','Pasto'];
+const dVal=[86.8,84.6,83.6,82.9,81.4,81.2,80.5,79.8,77.3,76.4,73.4,73.0,70.4,68.3,66.7,58.8,37.5];
+document.getElementById('cDestino').parentElement.style.height=(dLbl.length*18+60)+'px';
+new Chart(document.getElementById('cDestino'),{
+  type:'bar',
+  data:{labels:dLbl,datasets:[{label:'% On Time',data:dVal,backgroundColor:dVal.map(gc),borderRadius:3,barThickness:11}]},
+  options:{
+    indexAxis:'y',responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.x.toFixed(1)}% On Time`}}},
+    scales:{
+      x:{min:0,max:100,grid:{color:'#f2f3f5'},border:{display:false},ticks:{font:{size:9},color:'#aaa',callback:v=>v+'%'}},
+      y:{grid:{display:false},border:{display:false},ticks:{font:{size:10},color:'#444'}}
+    }
+  }
+});
+</script>
+</body>
+</html>
